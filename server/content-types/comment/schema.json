@@ -24,6 +24,10 @@
       "type": "text",
       "configurable": false
     },
+    "slug": {
+      "type": "text",
+      "configurable": false
+    },
     "author": {
       "type": "relation",
       "relation": "oneToOne",

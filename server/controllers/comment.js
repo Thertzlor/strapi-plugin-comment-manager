@@ -74,6 +74,7 @@ module.exports = {
     if (!user) {
       return ctx.badRequest("The user should be authenticated")
     }
+    console.log(ctx.params)
     const {slug} = ctx.params
     const {content} = ctx.request.body
     if (!content) {
