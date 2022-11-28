@@ -13,6 +13,14 @@ module.exports = {
     },
     {
       method: "GET",
+      path: "/content-id/:slug",
+      handler: "content-id.find",
+      config: {
+        policies: []
+      }
+    },
+    {
+      method: "GET",
       path: "/comments/:slug/count",
       handler: "comment.count",
       config: {
