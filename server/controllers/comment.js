@@ -10,21 +10,21 @@
 
 module.exports = {
   async find(ctx) {
-    const { slug } = ctx.params
-    const { start, ignoreCount } = ctx.request.query
+    const {slug} = ctx.params
+    const {start, ignoreCount} = ctx.request.query
     const pageSize = await strapi.service('plugin::comment-manager.comment').getPageSize()
     const comments = await strapi.entityService.findMany("plugin::comment-manager.comment",
       {
-        filters: { related_to: { slug } },
+        filters: {related_to: {slug}},
         limit: pageSize,
         start,
-        sort: { createdAt: "DESC" },
+        sort: {createdAt: "DESC"},
         populate: {
-          related_to: { fields: ["slug"] },
-          author: { fields: ["id", "username", "email"] },
+          related_to: {fields: ["slug"]},
+          author: {fields: ["id", "username", "email"]},
           subcomments: {
             fields: ["content", "createdAt", "from_admin"],
-            populate: { author: { fields: ["id", "username", "email"] } }
+            populate: {author: {fields: ["id", "username", "email"]}}
           }
         }
       }
@@ -32,13 +32,13 @@ module.exports = {
     let commentsCount
     if (!ignoreCount) {
       commentsCount = await strapi.db.query("plugin::comment-manager.comment")
-      .count(
-        {
-          where: {
-            related_to: { slug }
+        .count(
+          {
+            where: {
+              related_to: {slug}
+            }
           }
-        }
-      )
+        )
     }
     ctx.body = {
       commentsCount,
@@ -46,21 +46,21 @@ module.exports = {
     }
   },
   async getPage(ctx) {
-    const { slug } = ctx.params
-    const { start } = ctx.request.query
+    const {slug} = ctx.params
+    const {start} = ctx.request.query
     const pageSize = await strapi.service('plugin::comment-manager.comment').getPageSize()
     const comments = await strapi.entityService.findMany("plugin::comment-manager.comment",
       {
-        filters: { related_to: {slug} },
+        filters: {related_to: {slug}},
         limit: pageSize,
         start,
-        sort: { createdAt: "DESC" },
+        sort: {createdAt: "DESC"},
         populate: {
-          related_to: { fields: ["slug"] },
-          author: { fields: ["id", "username", "email"] },
+          related_to: {fields: ["slug"]},
+          author: {fields: ["id", "username", "email"]},
           subcomments: {
             fields: ["content", "createdAt", "from_admin"],
-            populate: { author: { fields: ["id", "username", "email"] } }
+            populate: {author: {fields: ["id", "username", "email"]}}
           }
         }
       }
@@ -70,12 +70,12 @@ module.exports = {
     }
   },
   async create(ctx) {
-    const { user } = ctx.state
+    const {user} = ctx.state
     if (!user) {
       return ctx.badRequest("The user should be authenticated")
     }
-    const { slug } = ctx.params
-    const { content } = ctx.request.body
+    const {slug} = ctx.params
+    const {content} = ctx.request.body
     if (!content) {
       return ctx.badRequest("Content should not be empty", {slug, content})
     }
@@ -88,8 +88,9 @@ module.exports = {
     })
     if (!contentID) {
       // First comment ever for this content
+      console.log('Yeah')
       contentID = await strapi.entityService.create("plugin::comment-manager.content-id", {
-        data: { slug }
+        data: {slug}
       })
     }
     // Create comment and associate it with id.
@@ -100,25 +101,25 @@ module.exports = {
         related_to: contentID.id
       }
     })
-    ctx.body = { id: newComment.id }
+    ctx.body = {id: newComment.id}
   },
   async getPageSize() {
     const pageSize = await strapi.service('plugin::comment-manager.comment').getPageSize()
-    return { pageSize }
+    return {pageSize}
   },
   async count(ctx) {
-    const { slug } = ctx.params
+    const {slug} = ctx.params
     // count comments related to this content
     const commentsCount = await strapi.db.query("plugin::comment-manager.comment").count({
       where: {
-        related_to: { slug }
+        related_to: {slug}
       }
     })
     // count subcomments related to this content
     const subcommentsCount = await strapi.db.query("plugin::comment-manager.subcomment").count({
       where: {
         parent_comment: {
-          related_to: { slug }
+          related_to: {slug}
         }
       }
     })

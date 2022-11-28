@@ -6,20 +6,20 @@
 
 module.exports = {
   async index(ctx) {
-    const { start, ignoreCount } = ctx.request.query
+    const {start, ignoreCount} = ctx.request.query
     const pageSize = await strapi.service('plugin::comment-manager.comment').getPageSize()
     const comments = await strapi.entityService.findMany("plugin::comment-manager.comment",
       {
         limit: pageSize,
         filters: {},
         start,
-        sort: { createdAt: "desc" },
+        sort: {createdAt: "desc"},
         populate: {
-          related_to: { fields: ["slug"] },
-          author: { fields: ["id", "username", "email"] },
+          related_to: {fields: ["slug"]},
+          author: {fields: ["id", "username", "email"]},
           subcomments: {
             fields: ["content", "createdAt", "from_admin"],
-            populate: { author: { fields: ["id", "username", "email"] } }
+            populate: {author: {fields: ["id", "username", "email"]}}
           }
         }
       }
@@ -36,20 +36,20 @@ module.exports = {
     }
   },
   async getPage(ctx) {
-    const { start } = ctx.request.query
+    const {start} = ctx.request.query
     const pageSize = await strapi.service('plugin::comment-manager.comment').getPageSize()
     const comments = await strapi.entityService.findMany("plugin::comment-manager.comment",
       {
         limit: pageSize,
         filters: {},
         start,
-        sort: { createdAt: "desc" },
+        sort: {createdAt: "desc"},
         populate: {
-          related_to: { fields: ["slug"] },
-          author: { fields: ["id", "username", "email"] },
+          related_to: {fields: ["slug"]},
+          author: {fields: ["id", "username", "email"]},
           subcomments: {
             fields: ["content", "createdAt", "from_admin"],
-            populate: { author: { fields: ["id", "username", "email"] } }
+            populate: {author: {fields: ["id", "username", "email"]}}
           }
         }
       }
@@ -86,8 +86,8 @@ module.exports = {
     ctx.body = res
   },
   async create(ctx) {
-    const { slug } = ctx.params
-    const { content } = ctx.request.body
+    const {slug} = ctx.params
+    const {content} = ctx.request.body
     if (!content) {
       return ctx.badRequest("Content should not be empty", {slug, content})
     }
@@ -100,6 +100,7 @@ module.exports = {
     })
     if (!contentID) {
       // First comment ever for this content
+      console.log('yeah, admin')
       contentID = await strapi.entityService.create("plugin::comment-manager.content-id", {
         data: {slug}
       })
@@ -112,10 +113,10 @@ module.exports = {
         from_admin: true
       }
     })
-    ctx.body = { id: newComment.id }
+    ctx.body = {id: newComment.id}
   },
   async delete(ctx) {
-    const { id } = ctx.params
+    const {id} = ctx.params
     // Delete parent comment and grab it's subcomments IDs
     const comment = await strapi.entityService.delete("plugin::comment-manager.comment", id, {
       populate: {
@@ -126,17 +127,17 @@ module.exports = {
     })
     // Then delete subcomments associated with the parent comment just deleted
     await Promise.all(comment.subcomments.map(async (data) => {
-      const { id } = data
+      const {id} = data
       await strapi.entityService.delete("plugin::comment-manager.subcomment", id)
     }))
-    ctx.body = { ok: "true" }
+    ctx.body = {ok: "true"}
   },
   async setPageSize(ctx) {
-    const { pageSize } = ctx.request.body
+    const {pageSize} = ctx.request.body
     if (!pageSize || pageSize < 1) {
       return ctx.badRequest("pageSize must be greater than 0")
     }
     strapi.service('plugin::comment-manager.comment').setPageSize(pageSize)
-    return { ok: true }
+    return {ok: true}
   }
 }
